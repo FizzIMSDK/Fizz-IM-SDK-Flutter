@@ -65,7 +65,7 @@ class DriverMessageManager extends BaseService {
   }
 
 //
-//   // 请求和通知
+//   // 发起请求
 //   Future<Notification> sendRequest(Request request) async {
 //     if (request.hasCreateSessionRequest()) {
 //       if (stateStore.isSessionOpen) {
