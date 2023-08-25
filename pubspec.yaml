@@ -1,7 +1,7 @@
-name: fizzim_sdk
-description: im的插件
+name: fim_sdk
+description: Fizz-IM-SDK-Flutter
 version: 0.0.1
-homepage: https://github.com/
+homepage: https://github.com/FizzIMSDK/Fizz-IM-SDK-Flutter
 
 environment:
   sdk: ">=2.17.0 <4.0.0"
