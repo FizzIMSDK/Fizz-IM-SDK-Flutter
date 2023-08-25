@@ -103,6 +103,8 @@ class UserManager {
     // if (isLoggedIn) {
     //   _userInfo?.onlineStatus = UserStatus.OFFLINE;
     _fIMManager.driver.stateStore.isSessionOpen = false;
+    //不管原因发起自动重连。
+    _fIMManager.autoLogin();
     for (final listener in _onOfflineListeners) {
       listener.call(sessionCloseInfo);
     }

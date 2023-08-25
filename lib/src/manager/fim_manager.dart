@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fim_sdk/src/models/user_info.dart';
 
 import '../../fim_sdk.dart';
+
 ///im sdk
 class FIMManager {
   //长连接管理
@@ -104,17 +105,15 @@ class FIMManager {
     if (result == ConnectivityResult.none) {
       return;
     }
-    if (isLogined == false) {
-      print("自动重连中...");
-      //其他情况
-      //只要网络变化就自动登录。重连socket
-      networkStatusChanged();
-    }
+    autoLogin();
   }
 
-  /// 网络改变 自动重连
-  Future<dynamic> networkStatusChanged() async {
-    login(userId: userId, token: token);
+  /// 自动重连
+  Future<dynamic> autoLogin() async {
+    if (isLogined == false) {
+      print("自动重连中...");
+      login(userId: userId, token: token);
+    }
   }
 
   FIMDriver get driver => _driver;
