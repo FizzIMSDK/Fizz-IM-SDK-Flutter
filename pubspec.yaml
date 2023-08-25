@@ -1,0 +1,31 @@
+name: fim_sdk
+description: im的插件
+version: 0.0.1
+homepage: https://github.com/
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+
+dependencies:
+  fixnum: ^1.0.1
+  http: ^0.13.5
+  # string 格式化
+  sprintf: ^7.0.0
+  #uuid
+  uuid: ^3.0.7
+  # http
+  dio: ^5.0.2
+  # 拦截器打印插件
+  pretty_dio_logger: ^1.3.1
+  #保存到相册插件
+  image_gallery_saver: ^2.0.3
+  #网络检测插件
+  connectivity_plus: ^4.0.2
+
+  #kv 存储
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+dev_dependencies:
+  lints: ^2.0.1
+  test: ^1.21.6
