@@ -11,20 +11,22 @@ import 'base_service.dart';
 // //通知返回类
 typedef NotificationListener = void Function(Protocol notification);
 
-//
-// class RequestContext {
-//   final Completer<Notification> completer;
-//   final Timer? timeoutTimer;
-//
-//   RequestContext(this.completer, this.timeoutTimer);
-// }
-//
-// //消息服务类
+///上行消息发送成功回调通知类 模拟tcp 上行缓冲池
+class RequestContext {
+  //回调通知
+  final Completer<Notification> completer;
+  //定时任务
+  final Timer? timeoutTimer;
+
+  RequestContext(this.completer, this.timeoutTimer);
+}
+
+///tcp消息服务类
 class DriverMessageManager extends BaseService {
   static const int randomMax = 1 << 32;
 
   final Random _random = Random();
-
+  //消息发送超时时间。默认1分钟
   late final int _requestTimeoutMillis;
   late final int _minRequestIntervalMillis;
   final List<NotificationListener> _notificationListeners = [];
