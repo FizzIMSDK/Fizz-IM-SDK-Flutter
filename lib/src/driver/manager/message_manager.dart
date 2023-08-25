@@ -11,10 +11,11 @@ import 'base_service.dart';
 // //通知返回类
 typedef NotificationListener = void Function(Protocol notification);
 
-///上行消息发送成功回调通知类 模拟tcp 上行缓冲池
+///上行消息发送成功回调通知类
 class RequestContext {
   //回调通知
   final Completer<Notification> completer;
+
   //定时任务
   final Timer? timeoutTimer;
 
@@ -26,24 +27,32 @@ class DriverMessageManager extends BaseService {
   static const int randomMax = 1 << 32;
 
   final Random _random = Random();
+
   //消息发送超时时间。默认1分钟
   late final int _requestTimeoutMillis;
+  //最小请求间隔毫秒 默认0
   late final int _minRequestIntervalMillis;
   final List<NotificationListener> _notificationListeners = [];
 
-  // final Map<int, RequestContext> _idToRequest = {};
-//
-  DriverMessageManager(StateStore stateStore, int? requestTimeoutMillis, int? minRequestIntervalMillis)
+  //消息上行缓冲区 (模拟tcp)
+  final Map<int, RequestContext> _idToRequest = {};
+
+  DriverMessageManager(StateStore stateStore, int? requestTimeoutMillis,
+      int? minRequestIntervalMillis)
       : super(stateStore) {
     _requestTimeoutMillis =
-        requestTimeoutMillis == null || requestTimeoutMillis <= 0 ? 60 * 1000 : requestTimeoutMillis;
+    requestTimeoutMillis == null || requestTimeoutMillis <= 0
+        ? 60 * 1000
+        : requestTimeoutMillis;
     _minRequestIntervalMillis = minRequestIntervalMillis ?? 0;
   }
 
   // Listeners
-  void addNotificationListener(NotificationListener listener) => _notificationListeners.add(listener);
+  void addNotificationListener(NotificationListener listener) =>
+      _notificationListeners.add(listener);
 
-  void removeNotificationListener(NotificationListener listener) => _notificationListeners.remove(listener);
+  void removeNotificationListener(NotificationListener listener) =>
+      _notificationListeners.remove(listener);
 
   void _notifyNotificationListeners(Protocol notification) {
     for (final listener in _notificationListeners) {
@@ -126,13 +135,14 @@ class DriverMessageManager extends BaseService {
 //     _notifyNotificationListeners(notification);
 //   }
 //
-//   int _generateRandomId() {
-//     int id;
-//     do {
-//       id = _random.nextInt(randomMax);
-//     } while (_idToRequest.containsKey(id));
-//     return id;
-//   }
+  ///获取随机数
+  int _generateRandomId() {
+    int id;
+    do {
+      id = _random.nextInt(randomMax);
+    } while (_idToRequest.containsKey(id));
+    return id;
+  }
 //
   void _rejectRequestCompleter(ResponseException exception) {
     // _idToRequest.removeWhere((key, context) {
@@ -150,7 +160,9 @@ class DriverMessageManager extends BaseService {
   @override
   void onDisconnected({Object? error, StackTrace? stackTrace}) {
     final exception =
-        ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed, cause: error, stackTrace: stackTrace);
+    ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed,
+        cause: error,
+        stackTrace: stackTrace);
     _rejectRequestCompleter(exception);
   }
 
