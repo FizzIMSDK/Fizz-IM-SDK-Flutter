@@ -6,6 +6,7 @@ import 'package:fim_sdk/src/models/user_info.dart';
 
 import '../../fim_sdk.dart';
 import '../models/listener_callback.dart';
+import '../models/session_close_status.dart';
 
 ///im sdk
 class FIMManager {
@@ -38,8 +39,11 @@ class FIMManager {
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   FIMDriver get driver => _driver;
+
   UserManager get userManager => _userManager;
+
   MessageManager get messageManager => _messageManager;
+
   StorageManager get storageManager => _storageManager;
 
   ///初始化SDK
@@ -56,6 +60,9 @@ class FIMManager {
     this._connectListener = listener;
     _driver = FIMDriver(this, tcpIp, tcpPort, connectTimeoutMillis, requestTimeoutMillis, minRequestIntervalMillis,
         heartbeatIntervalMillis);
+    //..addOnConnectedListener()
+    // ..addOnDisconnectedListener(({error, stackTrace}) => _userManager.changeToOffline(SessionCloseInfo.from(
+    //     closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
     _userManager = UserManager(this);
     _messageManager = MessageManager(this);
     _storageManager = StorageManager(this, apiAddr);
@@ -123,7 +130,7 @@ class FIMManager {
     }
   }
 
-  void call(ListenerCallback callback) {
+  void sdkCall(ListenerCallback callback) {
     if (callback.method == "connectListener") {
       switch (callback.type) {
         case 'onConnecting':

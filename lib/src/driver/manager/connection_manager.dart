@@ -173,13 +173,12 @@ class ConnectionManager extends BaseService {
         _initialConnectTimeoutMillis = connectTimeoutMillis ?? 30 * 1000,
         super(stateStore);
 
-  //重连标识
-  static bool retryConnect = false;
+  ///连接成功监听器
+  void addOnConnectedListener(OnConnectedListener listener) {
+    _onConnectedListeners.add(listener);
+  }
 
-  ///连接监听器
-  void addOnConnectedListener(OnConnectedListener listener) => _onConnectedListeners.add(listener);
-
-  ///连接关闭监听器
+  ///连接失败关闭监听器
   void addOnDisconnectedListener(OnDisconnectedListener listener) => _onDisconnectedListeners.add(listener);
 
   ///消息监听器
@@ -191,13 +190,14 @@ class ConnectionManager extends BaseService {
   void removeOnDisconnectedListener(OnDisconnectedListener listener) => _onDisconnectedListeners.remove(listener);
 
   void removeMessageListener(MessageListener listener) => _messageListeners.remove(listener);
-
+  //连接成功
   void _notifyOnConnectedListeners() {
     for (final listener in _onConnectedListeners) {
       listener.call();
     }
   }
 
+  //连接关闭通知
   void _notifyOnDisconnectedListeners(Object? error, StackTrace? stackTrace) {
     for (final listener in _onDisconnectedListeners) {
       listener.call(error: error, stackTrace: stackTrace);
@@ -266,13 +266,4 @@ class ConnectionManager extends BaseService {
   void onDisconnected({Object? error, StackTrace? stackTrace}) {
     print("告诉上层长连接断开了");
   }
-
-// static _retryConnectSocketIo() {
-//   if (retryConnect) {
-//     print("socket:开启重新连接");
-//     Future.delayed(Duration(seconds: 10), () {
-//       connect();
-//     });
-//   }
-// }
 }

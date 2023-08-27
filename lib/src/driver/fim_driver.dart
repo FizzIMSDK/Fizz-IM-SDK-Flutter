@@ -30,8 +30,10 @@ class FIMDriver {
   FIMDriver(this._fIMManager, String? tcpIp, int? tcpPort, int? connectTimeoutMillis, int? requestTimeoutMillis,
       int? minRequestIntervalMillis, int? heartbeatIntervalMillis) {
     _connectionManager = ConnectionManager(stateStore, tcpIp, tcpPort, connectTimeoutMillis)
-      ..addOnDisconnectedListener(_onConnectionDisconnected)
-      ..addMessageListener(_onMessage);
+      ..addOnConnectedListener(_addOnConnectedListener) //连接成功回调
+      //..removeOnConnectedListener(_addOnConnectedListener)
+      ..addOnDisconnectedListener(_onConnectionDisconnected) //连接失败回调
+      ..addMessageListener(_onMessage); //消息回调
     _heartbeatManager = HeartbeatManager(_stateStore, heartbeatIntervalMillis);
     _messageManager = DriverMessageManager(_stateStore, requestTimeoutMillis, minRequestIntervalMillis);
   }
@@ -60,15 +62,14 @@ class FIMDriver {
       {String? host, int? port, int? connectTimeoutMillis, bool? useTls, SecurityContext? context}) async {
     _connectionManager.connect(
         host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
-    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnecting"));
+    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnecting"));
   }
 
   bool get isConnected => _stateStore.isConnected;
 
   //连接开启
-  void addOnConnectedListener(OnConnectedListener listener) {
-    _connectionManager.addOnConnectedListener(listener);
-    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
+  void _addOnConnectedListener() {
+    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
   }
 
   //连接关闭 重置
@@ -76,7 +77,7 @@ class FIMDriver {
     _stateStore.reset();
     _heartbeatManager.onDisconnected(error: error, stackTrace: stackTrace);
     _messageManager.onDisconnected(error: error, stackTrace: stackTrace);
-    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnectFailed"));
+    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectFailed"));
   }
 
   //监听消息
@@ -85,6 +86,11 @@ class FIMDriver {
   //
   void removeNotificationListener(NotificationListener listener) =>
       _messageManager.removeNotificationListener(listener);
+
+  //连接成功
+  // void addOnConnectedListener(OnDisconnectedListener listener) {
+  //   _connectionManager.addOnConnectedListener(listener);
+  // }
 
   //连接关闭
   void addOnDisconnectedListener(OnDisconnectedListener listener) {

@@ -32,10 +32,9 @@ class UserManager {
   UserInfo? _userInfo;
 
   UserManager(this._fIMManager) {
-    _fIMManager.driver
-      //关闭连接监听器
-      ..addOnDisconnectedListener(({error, stackTrace}) => _changeToOffline(SessionCloseInfo.from(
-          closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
+    // _fIMManager.driver
+    //   ..addOnDisconnectedListener(({error, stackTrace}) => _changeToOffline(SessionCloseInfo.from(
+    //       closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
     // ..addNotificationListener((notification) {
     //   //断开连接 失败原因
     //   //if (notification.hasCloseStatus() && isLoggedIn) {
@@ -79,7 +78,7 @@ class UserManager {
     //}
   }
 
-  void _changeToOffline(SessionCloseInfo sessionCloseInfo) {
+  void changeToOffline(SessionCloseInfo sessionCloseInfo) {
     _fIMManager.isLogined = false;
     // if (isLoggedIn) {
     //   _userInfo?.onlineStatus = UserStatus.OFFLINE;
