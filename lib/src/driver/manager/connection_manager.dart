@@ -230,6 +230,7 @@ class ConnectionManager extends BaseService {
     });
     connectTimeoutMillis ??= _initialConnectTimeoutMillis;
     final timeout = connectTimeoutMillis > 0 ? Duration(milliseconds: connectTimeoutMillis) : null;
+    //网络断开 硬连接这里会报错 应该try一下
     await tcp.connect(host ?? _initialHost, port ?? _initialPort, useTls ?? false, context, timeout);
     stateStore.tcp = tcp;
     _onSocketOpened();
