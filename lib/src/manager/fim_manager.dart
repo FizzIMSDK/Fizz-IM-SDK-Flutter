@@ -59,10 +59,9 @@ class FIMManager {
   }) {
     this._connectListener = listener;
     _driver = FIMDriver(this, tcpIp, tcpPort, connectTimeoutMillis, requestTimeoutMillis, minRequestIntervalMillis,
-        heartbeatIntervalMillis);
-    //..addOnConnectedListener()
-    // ..addOnDisconnectedListener(({error, stackTrace}) => _userManager.changeToOffline(SessionCloseInfo.from(
-    //     closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
+        heartbeatIntervalMillis)
+      ..addOnDisconnectedListener(({error, stackTrace}) => _userManager.changeToOffline(SessionCloseInfo.from(
+          closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
     _userManager = UserManager(this);
     _messageManager = MessageManager(this);
     _storageManager = StorageManager(this, apiAddr);
