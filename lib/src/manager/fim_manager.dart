@@ -127,12 +127,15 @@ class FIMManager {
     if (callback.method == "connectListener") {
       switch (callback.type) {
         case 'onConnecting':
+          print("连接中");
           _connectListener.connecting();
           break;
-        case 'onConnectFailed':
+        case 'onConnectSuccess':
+          print("连接成功");
           _connectListener.connectSuccess();
           break;
-        case 'onConnectSuccess':
+        case 'onConnectFailed':
+          print("连接失败");
           _connectListener.connectFailed(callback.errCode, callback.errMsg);
           break;
       }

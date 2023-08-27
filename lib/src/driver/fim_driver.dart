@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import '../../fim_sdk.dart';
 import '../models/gen_message.dart';
+import '../models/listener_callback.dart';
 import '../models/protocol.dart';
 import 'manager/connection_manager.dart';
 import 'manager/heartbeat_manager.dart';
@@ -55,20 +56,27 @@ class FIMDriver {
 
   // Connection Service
 
-  Future<void> connect({String? host, int? port, int? connectTimeoutMillis, bool? useTls, SecurityContext? context}) =>
-      _connectionManager.connect(
-          host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
+  Future<void> connect(
+      {String? host, int? port, int? connectTimeoutMillis, bool? useTls, SecurityContext? context}) async {
+    _connectionManager.connect(
+        host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
+    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnecting"));
+  }
 
   bool get isConnected => _stateStore.isConnected;
 
   //连接开启
-  void addOnConnectedListener(OnConnectedListener listener) => _connectionManager.addOnConnectedListener(listener);
+  void addOnConnectedListener(OnConnectedListener listener) {
+    _connectionManager.addOnConnectedListener(listener);
+    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
+  }
 
   //连接关闭 重置
   void _onConnectionDisconnected({Object? error, StackTrace? stackTrace}) {
     _stateStore.reset();
     _heartbeatManager.onDisconnected(error: error, stackTrace: stackTrace);
     _messageManager.onDisconnected(error: error, stackTrace: stackTrace);
+    _fIMManager.call(ListenerCallback(method: 'connectListener', type: "onConnectFailed"));
   }
 
   //监听消息
