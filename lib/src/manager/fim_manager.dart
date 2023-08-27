@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fim_sdk/src/models/session_close_info.dart';
 import 'package:fim_sdk/src/models/user_info.dart';
 
 import '../../fim_sdk.dart';
+import '../models/listener_callback.dart';
 
 ///im sdk
 class FIMManager {
@@ -34,6 +36,11 @@ class FIMManager {
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  FIMDriver get driver => _driver;
+  UserManager get userManager => _userManager;
+  MessageManager get messageManager => _messageManager;
+  StorageManager get storageManager => _storageManager;
 
   ///初始化SDK
   initSDK({
@@ -116,11 +123,19 @@ class FIMManager {
     }
   }
 
-  FIMDriver get driver => _driver;
-
-  UserManager get userManager => _userManager;
-
-  MessageManager get messageManager => _messageManager;
-
-  StorageManager get storageManager => _storageManager;
+  void call(ListenerCallback callback) {
+    if (callback.method == "connectListener") {
+      switch (callback.type) {
+        case 'onConnecting':
+          _connectListener.connecting();
+          break;
+        case 'onConnectFailed':
+          _connectListener.connectSuccess();
+          break;
+        case 'onConnectSuccess':
+          _connectListener.connectFailed(callback.errCode, callback.errMsg);
+          break;
+      }
+    }
+  }
 }

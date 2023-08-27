@@ -62,25 +62,6 @@ class UserManager {
 
   void removeOnOfflineListener(OnOfflineListener listener) => _onOfflineListeners.remove(listener);
 
-  //登录
-  Future<bool> login(String userId, String token, int clientType, String deviceId) async {
-    //判断tcp连接状态
-    if (!_fIMManager.driver.isConnected) {
-      await _fIMManager.driver.connect();
-    }
-    //组装协议
-    LoginReq loginReq = new LoginReq();
-    loginReq.loginUserId = userId;
-    loginReq.loginToken = token;
-    loginReq.clientType = clientType;
-    loginReq.deviceId = deviceId;
-    _sendModel(loginReq);
-    //登录完成修改在线状态
-    _changeToOnline();
-    //登陆成功存储token和过期时间到内存。用于会话等http接口使用。
-    return true;
-  }
-
   //将model编码成协议对象
   Future _sendModel(LoginReq loginReq) async {
     Protocol msg = Protocol.buildMsg("0", loginReq);

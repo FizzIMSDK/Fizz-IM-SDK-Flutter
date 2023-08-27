@@ -94,7 +94,6 @@ class TcpClient {
   void _onClosed0(Object? error, StackTrace? stackTrace) {
     if (isOpen) {
       try {
-        print("tcp断开");
         _onClosed.call(error: error, stackTrace: stackTrace);
       } catch (e) {
         // TODO: log

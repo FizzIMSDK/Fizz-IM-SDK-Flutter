@@ -34,6 +34,7 @@ class FIMDriver {
     _heartbeatManager = HeartbeatManager(_stateStore, heartbeatIntervalMillis);
     _messageManager = DriverMessageManager(_stateStore, requestTimeoutMillis, minRequestIntervalMillis);
   }
+
   // Getters
 
   StateStore get stateStore => _stateStore;
@@ -60,6 +61,9 @@ class FIMDriver {
 
   bool get isConnected => _stateStore.isConnected;
 
+  //连接开启
+  void addOnConnectedListener(OnConnectedListener listener) => _connectionManager.addOnConnectedListener(listener);
+
   //连接关闭 重置
   void _onConnectionDisconnected({Object? error, StackTrace? stackTrace}) {
     _stateStore.reset();
@@ -75,8 +79,9 @@ class FIMDriver {
       _messageManager.removeNotificationListener(listener);
 
   //连接关闭
-  void addOnDisconnectedListener(OnDisconnectedListener listener) =>
-      _connectionManager.addOnDisconnectedListener(listener);
+  void addOnDisconnectedListener(OnDisconnectedListener listener) {
+    _connectionManager.addOnDisconnectedListener(listener);
+  }
 
   // Message Service
   //1.传递自定义协议子类
