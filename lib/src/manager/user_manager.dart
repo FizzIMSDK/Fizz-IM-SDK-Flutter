@@ -83,8 +83,9 @@ class UserManager {
     // if (isLoggedIn) {
     //   _userInfo?.onlineStatus = UserStatus.OFFLINE;
     _fIMManager.driver.stateStore.isSessionOpen = false;
-    //不管原因发起自动重连。
-    _fIMManager.autoLogin();
+    //不管原因发起自动重连。模拟连接中1s后重连 只是测试页面用 可以毫秒级别
+    Future.delayed(const Duration(seconds: 1), () => _fIMManager.autoLogin());
+
     for (final listener in _onOfflineListeners) {
       listener.call(sessionCloseInfo);
     }
