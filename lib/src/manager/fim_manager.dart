@@ -5,6 +5,7 @@ import 'package:fim_sdk/src/models/session_close_info.dart';
 import 'package:fim_sdk/src/models/user_info.dart';
 
 import '../../fim_sdk.dart';
+import '../models/Login.dart';
 import '../models/listener_callback.dart';
 import '../models/session_close_status.dart';
 
@@ -80,12 +81,15 @@ class FIMManager {
       await _driver.connect();
     }
     // //组装协议
-    // LoginReq loginReq = new LoginReq();
-    // loginReq.loginUserId = userId;
-    // loginReq.loginToken = token;
-    // loginReq.clientType = clientType;
-    // loginReq.deviceId = deviceId;
-    // _sendModel(loginReq);
+    LoginReq loginReq = new LoginReq();
+    loginReq.loginUserId = userId;
+    loginReq.loginToken = token;
+    loginReq.clientType = 3;
+    loginReq.deviceId = "deviceId";
+    //_sendModel(loginReq);
+    Protocol msg = Protocol.buildMsg("0", loginReq);
+    _driver.sendMsg(msg);
+
     // //登录完成修改在线状态
     // _changeToOnline();
     //登陆成功存储token和过期时间到内存。用于会话等http接口使用。
@@ -94,6 +98,8 @@ class FIMManager {
     this.token = token;
     //登录成功
     _registerNetworkCallback();
+    //修改sdk为在线状态
+    userManager.changeToOnline();
     return UserInfo(userID: "1");
   }
 
@@ -123,13 +129,13 @@ class FIMManager {
 
   /// 自动重连
   Future<dynamic> autoLogin() async {
-    if (isLogined == false) {
+    if (isLogined == false && userId.isNotEmpty && token.isNotEmpty) {
       print("自动重连中...");
       login(userId: userId, token: token);
     }
   }
 
-  void sdkCall(ListenerCallback callback) {
+  void sdkCall(ListenerCallback callback) async {
     if (callback.method == "connectListener") {
       switch (callback.type) {
         case 'onConnecting':

@@ -62,13 +62,13 @@ class UserManager {
   void removeOnOfflineListener(OnOfflineListener listener) => _onOfflineListeners.remove(listener);
 
   //将model编码成协议对象
-  Future _sendModel(LoginReq loginReq) async {
-    Protocol msg = Protocol.buildMsg("0", loginReq);
-    await _fIMManager.driver.sendMsg(msg);
-  }
+  // Future _sendModel(LoginReq loginReq) async {
+  //   Protocol msg = Protocol.buildMsg("0", loginReq);
+  //   await _fIMManager.driver.sendMsg(msg);
+  // }
 
   //修改在线状态
-  void _changeToOnline() {
+  void changeToOnline() {
     _fIMManager.driver.stateStore.isSessionOpen = true;
     // if (!isLoggedIn) {
     //   _fIMManager.driver.stateStore.isSessionOpen = true;
