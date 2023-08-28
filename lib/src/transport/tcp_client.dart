@@ -28,6 +28,7 @@ class TcpClient {
       throw StateError('The TCP client has connected');
     }
     final stopwatch = Stopwatch()..start();
+    //check the target network is usable
     final addresses = await InternetAddress.lookup(host);
     metrics.addressResolverTime = stopwatch.elapsedMilliseconds;
     if (addresses.isEmpty) {

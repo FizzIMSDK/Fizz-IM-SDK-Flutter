@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:fim_sdk/src/utils/int_extensions.dart';
+import 'package:http/http.dart';
 
 import '../../exception/response_exception.dart';
+import '../../models/Request.dart';
 import '../../models/protocol.dart';
 import '../../models/response_status_code.dart';
 import '../state_store.dart';
@@ -12,15 +17,15 @@ import 'base_service.dart';
 typedef NotificationListener = void Function(Protocol notification);
 
 ///上行消息发送成功回调通知类
-// class RequestContext {
-//   //回调通知
-//   final Completer<Notification> completer;
-//
-//   //定时任务
-//   final Timer? timeoutTimer;
-//
-//   RequestContext(this.completer, this.timeoutTimer);
-// }
+class RequestContext {
+  //回调通知
+  final Completer<Protocol> completer;
+
+  //定时任务
+  final Timer? timeoutTimer;
+
+  RequestContext(this.completer, this.timeoutTimer);
+}
 
 ///tcp消息服务类
 class DriverMessageManager extends BaseService {
@@ -30,24 +35,30 @@ class DriverMessageManager extends BaseService {
 
   //消息发送超时时间。默认1分钟
   late final int _requestTimeoutMillis;
+
   //最小请求间隔毫秒 默认0
   late final int _minRequestIntervalMillis;
   final List<NotificationListener> _notificationListeners = [];
 
-  //消息上行缓冲区 (模拟tcp)
-  //final Map<int, RequestContext> _idToRequest = {};
+  //消息上行缓冲区 (缓冲1分钟。收到服务器回执才算消息发送成功。)
+  final Map<int, RequestContext> _idToRequest = {};
 
-  DriverMessageManager(StateStore stateStore, int? requestTimeoutMillis, int? minRequestIntervalMillis)
+  DriverMessageManager(StateStore stateStore, int? requestTimeoutMillis,
+      int? minRequestIntervalMillis)
       : super(stateStore) {
     _requestTimeoutMillis =
-        requestTimeoutMillis == null || requestTimeoutMillis <= 0 ? 60 * 1000 : requestTimeoutMillis;
+        requestTimeoutMillis == null || requestTimeoutMillis <= 0
+            ? 60 * 1000
+            : requestTimeoutMillis;
     _minRequestIntervalMillis = minRequestIntervalMillis ?? 0;
   }
 
   // Listeners
-  void addNotificationListener(NotificationListener listener) => _notificationListeners.add(listener);
+  void addNotificationListener(NotificationListener listener) =>
+      _notificationListeners.add(listener);
 
-  void removeNotificationListener(NotificationListener listener) => _notificationListeners.remove(listener);
+  void removeNotificationListener(NotificationListener listener) =>
+      _notificationListeners.remove(listener);
 
   void _notifyNotificationListeners(Protocol notification) {
     for (final listener in _notificationListeners) {
@@ -57,6 +68,37 @@ class DriverMessageManager extends BaseService {
         print('$e\n$s');
       }
     }
+  }
+
+  Future<Protocol> sendRequest(FimRequest request) async {
+    if (!stateStore.isConnected || !stateStore.isSessionOpen) {
+      throw ResponseException(
+          code: ResponseStatusCode.clientSessionHasBeenClosed);
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final difference = now - stateStore.lastRequestDate;
+    final isFrequent = _minRequestIntervalMillis > 0 &&
+        difference <= _minRequestIntervalMillis;
+    if (isFrequent) {
+      throw ResponseException(
+          code: ResponseStatusCode.clientRequestsTooFrequent);
+    }
+    final requestId = _generateRandomId();
+    request.requestId = requestId.toInt64();
+    final payload = request.writeToBuffer();
+    stateStore.tcp!.writeVarIntLengthAndBytes(payload);
+    final timeoutTimer = _requestTimeoutMillis > 0
+        ? Timer(Duration(milliseconds: _requestTimeoutMillis), () {
+            final context = _idToRequest.remove(requestId);
+            context?.completer.completeError(
+                ResponseException(code: ResponseStatusCode.requestTimeout));
+          })
+        : null;
+    final completer = Completer<Protocol>();
+    final requestContext = RequestContext(completer, timeoutTimer);
+    _idToRequest[requestId] = requestContext;
+    stateStore.lastRequestDate = now;
+    return completer.future;
   }
 
 //
@@ -131,13 +173,13 @@ class DriverMessageManager extends BaseService {
 //   }
 //
   ///获取随机数
-  // int _generateRandomId() {
-  //   int id;
-  //   do {
-  //     id = _random.nextInt(randomMax);
-  //   } while (_idToRequest.containsKey(id));
-  //   return id;
-  // }
+  int _generateRandomId() {
+    int id;
+    do {
+      id = _random.nextInt(randomMax);
+    } while (_idToRequest.containsKey(id));
+    return id;
+  }
 
 //
   void _rejectRequestCompleter(ResponseException exception) {
@@ -155,8 +197,10 @@ class DriverMessageManager extends BaseService {
 
   @override
   void onDisconnected({Object? error, StackTrace? stackTrace}) {
-    final exception =
-        ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed, cause: error, stackTrace: stackTrace);
+    final exception = ResponseException(
+        code: ResponseStatusCode.clientSessionHasBeenClosed,
+        cause: error,
+        stackTrace: stackTrace);
     _rejectRequestCompleter(exception);
   }
 

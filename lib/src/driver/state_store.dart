@@ -6,7 +6,7 @@ class StateStore {
   //是否连接
   bool isConnected = false;
 
-  // Session
+  // 用户Session
   bool isSessionOpen = false;
 
   // Request
