@@ -30,7 +30,7 @@ class FIMDriver {
   FIMDriver(this._fIMManager, String? tcpIp, int? tcpPort, int? connectTimeoutMillis, int? requestTimeoutMillis,
       int? minRequestIntervalMillis, int? heartbeatIntervalMillis) {
     _connectionManager = ConnectionManager(stateStore, tcpIp, tcpPort, connectTimeoutMillis)
-      //..addOnConnectedListener(_addOnConnectedListener) //连接成功回调
+      ..addOnConnectedListener(_addOnConnectedListener) //连接成功回调
       ..addOnDisconnectedListener(_onConnectionDisconnected) //连接失败回调
       ..addMessageListener(_onMessage); //消息回调
     _heartbeatManager = HeartbeatManager(_stateStore, heartbeatIntervalMillis);
@@ -62,14 +62,13 @@ class FIMDriver {
     _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnecting"));
     await _connectionManager.connect(
         host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
-    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
   }
 
   bool get isConnected => _stateStore.isConnected;
 
-  //连接开启
-  void _addOnConnectedListener(OnConnectedListener listener) {
-    _connectionManager.addOnConnectedListener(listener);
+  //连接成功
+  void _addOnConnectedListener() {
+    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
   }
 
   //连接关闭 重置
@@ -87,10 +86,6 @@ class FIMDriver {
   void removeNotificationListener(NotificationListener listener) =>
       _messageManager.removeNotificationListener(listener);
 
-  //连接成功
-  // void addOnConnectedListener(OnDisconnectedListener listener) {
-  //   _connectionManager.addOnConnectedListener(listener);
-  // }
 
   //连接关闭
   void addOnDisconnectedListener(OnDisconnectedListener listener) {
