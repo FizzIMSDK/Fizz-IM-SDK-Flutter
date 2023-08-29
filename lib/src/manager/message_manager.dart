@@ -2,8 +2,10 @@ import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart' show Int64;
 
+import '../../fim_sdk.dart';
 import '../listener/advanced_msg_listener.dart';
 import '../models/protocol.dart';
+import '../models/v1_fim_message.dart';
 import 'fim_manager.dart';
 
 typedef MessageListener = void Function(Protocol message);
@@ -73,9 +75,14 @@ class MessageManager {
   Protocol _createMessageRequest2Message(protocol) => Protocol();
 
 //创建文本消息
-  void createTextMessage({required text}) {
-
-
+  Message createTextMessage({
+    required String text,
+  }) {
+    return Message();
   }
+  // 发送json message.toJson()
+  Future<Message> sendMessage({required  Message message}) =>
+      _fIMManager.driver.send(new TextMsgReq()).then((value) => new Message());
+
 //创建图片消息
 }

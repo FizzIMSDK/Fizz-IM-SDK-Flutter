@@ -3,7 +3,7 @@ import 'package:fim_sdk/src/models/v1_fim_image_elem.dart';
 import 'v2_tim_text_elem.dart';
 
 ///消息协议体
-class V1FimMessage {
+class Message {
   /// 消息ID
   late String? msgId;
 
