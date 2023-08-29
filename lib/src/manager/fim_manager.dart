@@ -86,9 +86,7 @@ class FIMManager {
     loginReq.loginToken = token;
     loginReq.clientType = 3;
     loginReq.deviceId = "deviceId";
-    //_sendModel(loginReq);
-    Protocol msg = Protocol.buildMsg("0", loginReq);
-    _driver.sendMsg(msg);
+    _driver.send(loginReq);
 
     // //登录完成修改在线状态
     // _changeToOnline();

@@ -96,8 +96,8 @@ class FIMDriver {
   //1.传递自定义协议子类
   //2.生成Protocol 父类返回通知
   Future<Protocol> send(GenMessage genMessage) async {
-    Protocol msg = Protocol.buildMsg("0", genMessage);
-    final notification = await _messageManager.sendMsg(msg);
+    Protocol msg = Protocol.buildMsg(genMessage.getTo(), genMessage);
+    final notification = await _messageManager.sendRequest(msg);
     //session是否创建 否则用本地token自动登录重连
     //if (request.hasCreateSessionRequest()) {
     _heartbeatManager.start();
@@ -106,11 +106,11 @@ class FIMDriver {
   }
 
   // 发送Msg消息 暂时不做重发啥的
-  Future<void> sendMsg(Protocol msg) async {
-    final notification = await _messageManager.sendMsg(msg);
-
-    _heartbeatManager.start();
-  }
+  // Future<void> sendMsg(Protocol msg) async {
+  //   final notification = await _messageManager.sendRequest(msg);
+  //
+  //   _heartbeatManager.start();
+  // }
 
   //处理二进制消息
   void _onMessage(Uint8List message) {

@@ -50,7 +50,7 @@ class HeartbeatManager extends BaseService {
     if (!stateStore.isConnected || !stateStore.isSessionOpen) {
       throw ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed);
     }
-    print("发送心跳");
+    print("发送心跳到服务器");
     stateStore.tcp!.write(Protocol.buildMsg("0", HeartbeatMsg()).encode());
     final completer = Completer<void>();
     _heartbeatCompleters.add(completer);

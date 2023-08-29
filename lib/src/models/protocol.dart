@@ -1,3 +1,5 @@
+import 'package:fixnum/fixnum.dart';
+
 import 'dart:typed_data';
 
 
@@ -20,7 +22,7 @@ class Protocol extends Codec {
   String? to;
 
   //全局唯一id
-  String? fp;
+  Int64? requestId;
 
   //用户协议 dataContent的
   int? typeu;
@@ -34,7 +36,6 @@ class Protocol extends Codec {
     msg.to = to;
     msg.type = genMessage.getType();
     msg.typeu = genMessage.getTypeu();
-    msg.fp = GenUtil.genUuid().toString();
     msg.QoS = true;
     if (genMessage.getData() != null) {
       msg.dataContent = genMessage.getData();
@@ -69,7 +70,7 @@ class Protocol extends Codec {
         from = map["from"] ?? '',
         to = map['to'] ?? '',
         typeu = map['typeu'] ?? '',
-        fp = map['fp'] ?? '',
+        requestId = map['fp'] ?? '',
         QoS = map['QoS'] ?? false,
         dataContent = map['dataContent'] ?? '';
 
@@ -79,7 +80,7 @@ class Protocol extends Codec {
       'from': from,
       'to': to,
       'typeu': typeu,
-      'fp': fp,
+      'fp': requestId,
       'QoS': QoS,
       'dataContent': dataContent,
     };

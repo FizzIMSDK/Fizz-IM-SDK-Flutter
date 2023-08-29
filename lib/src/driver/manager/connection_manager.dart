@@ -182,7 +182,7 @@ class ConnectionManager extends BaseService {
   ///消息监听器
   void addMessageListener(MessageListener listener) => _messageListeners.add(listener);
 
-  ///消息监听器
+  ///连接关闭回调
   void removeOnConnectedListener(OnConnectedListener listener) => _onConnectedListeners.remove(listener);
 
   void removeOnDisconnectedListener(OnDisconnectedListener listener) => _onDisconnectedListeners.remove(listener);

@@ -7,8 +7,8 @@ abstract class GenMessage {
     return "";
   }
   //0 =服务器
-  int getTo() {
-    return 0;
+  String getTo() {
+    return "0";
   }
 
   //im协议

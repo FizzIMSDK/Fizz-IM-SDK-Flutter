@@ -70,7 +70,7 @@ class DriverMessageManager extends BaseService {
     }
   }
 
-  Future<Protocol> sendRequest(FimRequest request) async {
+  Future<Protocol> sendRequest(Protocol request) async {
     if (!stateStore.isConnected || !stateStore.isSessionOpen) {
       throw ResponseException(
           code: ResponseStatusCode.clientSessionHasBeenClosed);
@@ -83,9 +83,10 @@ class DriverMessageManager extends BaseService {
       throw ResponseException(
           code: ResponseStatusCode.clientRequestsTooFrequent);
     }
+
     final requestId = _generateRandomId();
     request.requestId = requestId.toInt64();
-    final payload = request.writeToBuffer();
+    var payload = request.encode();
     stateStore.tcp!.writeVarIntLengthAndBytes(payload);
     final timeoutTimer = _requestTimeoutMillis > 0
         ? Timer(Duration(milliseconds: _requestTimeoutMillis), () {
@@ -101,46 +102,35 @@ class DriverMessageManager extends BaseService {
     return completer.future;
   }
 
-//
-//   // 发起请求
-//   Future<Notification> sendRequest(Request request) async {
-//     if (request.hasCreateSessionRequest()) {
-//       if (stateStore.isSessionOpen) {
-//         throw ResponseException(
-//             code: ResponseStatusCode.clientSessionAlreadyEstablished);
-//       }
-//     } else if (!stateStore.isConnected || !stateStore.isSessionOpen) {
-//       throw ResponseException(
-//           code: ResponseStatusCode.clientSessionHasBeenClosed);
-//     }
-//     final now = DateTime.now().millisecondsSinceEpoch;
-//     final difference = now - stateStore.lastRequestDate;
-//     final isFrequent = _minRequestIntervalMillis > 0 &&
-//         difference <= _minRequestIntervalMillis;
-//     if (isFrequent) {
-//       throw ResponseException(
-//           code: ResponseStatusCode.clientRequestsTooFrequent);
-//     }
-//     final requestId = _generateRandomId();
-//     request.requestId = requestId.toInt64();
-//     final payload = request.writeToBuffer();
-//     stateStore.tcp!.writeVarIntLengthAndBytes(payload);
-//     final timeoutTimer = _requestTimeoutMillis > 0
-//         ? Timer(Duration(milliseconds: _requestTimeoutMillis), () {
-//             final context = _idToRequest.remove(requestId);
-//             context?.completer.completeError(
-//                 ResponseException(code: ResponseStatusCode.requestTimeout));
-//           })
-//         : null;
-//     final completer = Completer<TurmsNotification>();
-//     final requestContext = TurmsRequestContext(completer, timeoutTimer);
-//     _idToRequest[requestId] = requestContext;
-//     stateStore.lastRequestDate = now;
-//     return completer.future;
-//   }
-//
-
   void didReceiveNotification(notification) {
+    //获取消息id 清理上行缓存区。取消timer
+   /* final isResponse =
+        !notification.hasRelayedRequest() && notification.hasRequestId();
+    if (isResponse) {
+      final requestId = notification.requestId.toInt();
+      final context = _idToRequest.remove(requestId);
+      if (context != null) {
+        context.timeoutTimer?.cancel();
+        if (notification.hasCode()) {
+        //回调消息发送成功
+          if (ResponseStatusCode.isSuccessCode(notification.code)) {
+            context.completer.complete(notification);
+          } else {
+            context.completer.completeError(
+                ResponseException.fromNotification(notification));
+          }
+        } else {
+          context.completer.completeError(ResponseException(
+              requestId:
+              notification.hasRequestId() ? notification.requestId : null,
+              code: ResponseStatusCode.invalidNotification,
+              reason: 'The code is missing'));
+        }
+      }
+    }*/
+
+
+
     _notifyNotificationListeners(notification);
   }
 
@@ -205,8 +195,8 @@ class DriverMessageManager extends BaseService {
   }
 
   //发送消息
-  Future sendMsg(Protocol msg) async {
-    var payload = msg.encode();
-    stateStore.tcp!.writeVarIntLengthAndBytes(payload);
-  }
+  // Future sendMsg(Protocol msg) async {
+  //   var payload = msg.encode();
+  //   stateStore.tcp!.writeVarIntLengthAndBytes(payload);
+  // }
 }
