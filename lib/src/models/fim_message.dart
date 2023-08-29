@@ -1,9 +1,9 @@
-import 'package:fim_sdk/src/models/v1_fim_image_elem.dart';
+import 'package:fim_sdk/src/models/fim_image_elem.dart';
 
-import 'v2_tim_text_elem.dart';
+import 'fim_text_elem.dart';
 
 ///消息协议体
-class Message {
+class FimMessage {
   /// 消息ID
   late String? msgId;
 
@@ -38,8 +38,8 @@ class Message {
   late int elemType;
 
   /// 文本消息
-  V1FimTextElem? textElem;
+  FimTextElem? textElem;
 
   /// 图片消息
-  V1FimImageElem? imageElem;
+  FimImageElem? imageElem;
 }

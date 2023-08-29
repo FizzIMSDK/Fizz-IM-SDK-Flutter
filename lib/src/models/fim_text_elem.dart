@@ -1,16 +1,16 @@
 import 'dart:convert';
-import 'v1_fim_elem.dart';
+import 'fim_elem.dart';
 
 
 ///文本消息
-class V1FimTextElem extends V1FIMElem {
+class FimTextElem extends V1FIMElem {
   late String? text;
 
-  V1FimTextElem({
+  FimTextElem({
     this.text,
   });
 
-  V1FimTextElem.fromJson(Map<String, dynamic> json) {
+  FimTextElem.fromJson(Map<String, dynamic> json) {
     text = json['text'];
     if (json['nextElem'] != null) {
       nextElem = Map<String, dynamic>.from(json['nextElem']);

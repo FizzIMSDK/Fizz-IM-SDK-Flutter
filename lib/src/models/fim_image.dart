@@ -2,7 +2,7 @@
 ///
 /// {@category Models}
 ///
-class V1FimImage {
+class FimImageElem {
   // ignore: non_constant_identifier_names
   late String? uuid;
 
@@ -24,7 +24,7 @@ class V1FimImage {
   /// 图片本地url，通过downloadMessage下载消息后此字段有值
   String? localUrl;
 
-  V1FimImage({
+  FimImageElem({
     // ignore: non_constant_identifier_names
     this.uuid,
     required this.type,
@@ -35,7 +35,7 @@ class V1FimImage {
     this.localUrl,
   });
 
-  V1FimImage.fromJson(Map<String, dynamic> json) {
+  FimImageElem.fromJson(Map<String, dynamic> json) {
     uuid = json['UUID'] ?? json['uuid'];
     type = json['type'];
     size = json['size'];
