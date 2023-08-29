@@ -21,4 +21,11 @@ export 'src/manager/user_manager.dart';
 export 'src/models/protocol.dart';
 export 'src/models/text_msg.dart';
 
+export 'src/models/fim_elem.dart';
+export 'src/models/fim_message.dart';
+export 'src/models/fim_text_elem.dart';
+export 'src/models/fim_image_elem.dart';
+
+
+
 
