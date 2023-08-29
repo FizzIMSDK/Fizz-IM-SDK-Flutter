@@ -75,7 +75,7 @@ class MessageManager {
   Protocol _createMessageRequest2Message(protocol) => Protocol();
 
 //创建文本消息
-  FimMessage createTextMessage({
+  FimMessage createTextMessage ({
     required String text,
   }) {
     return FimMessage();
