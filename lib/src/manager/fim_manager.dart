@@ -93,8 +93,7 @@ class FIMManager {
     loginReq.loginToken = token;
     loginReq.clientType = 3;
     loginReq.deviceId = "deviceId";
-    final n = _driver.send(loginReq);
-
+    final n = _driver.send(loginReq).then((value) => (print("登录成功")));
     // //登录完成修改在线状态
     // _changeToOnline();
     //登陆成功存储token和过期时间到内存。用于会话等http接口使用。
