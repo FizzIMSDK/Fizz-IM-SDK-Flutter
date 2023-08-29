@@ -62,13 +62,13 @@ class UserManager {
   void removeOnOfflineListener(OnOfflineListener listener) => _onOfflineListeners.remove(listener);
 
   //将model编码成协议对象
-  Future _sendModel(LoginReq loginReq) async {
-    Protocol msg = Protocol.buildMsg("0", loginReq);
-    await _fIMManager.driver.sendMsg(msg);
-  }
+  // Future _sendModel(LoginReq loginReq) async {
+  //   Protocol msg = Protocol.buildMsg("0", loginReq);
+  //   await _fIMManager.driver.sendMsg(msg);
+  // }
 
   //修改在线状态
-  void _changeToOnline() {
+  void changeToOnline() {
     _fIMManager.driver.stateStore.isSessionOpen = true;
     // if (!isLoggedIn) {
     //   _fIMManager.driver.stateStore.isSessionOpen = true;
@@ -83,8 +83,9 @@ class UserManager {
     // if (isLoggedIn) {
     //   _userInfo?.onlineStatus = UserStatus.OFFLINE;
     _fIMManager.driver.stateStore.isSessionOpen = false;
-    //不管原因发起自动重连。
-    _fIMManager.autoLogin();
+    //不管原因发起自动重连。模拟连接中1s后重连 只是测试页面用 可以毫秒级别
+    Future.delayed(const Duration(seconds: 1), () => _fIMManager.autoLogin());
+
     for (final listener in _onOfflineListeners) {
       listener.call(sessionCloseInfo);
     }

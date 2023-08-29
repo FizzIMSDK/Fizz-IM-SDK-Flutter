@@ -174,9 +174,7 @@ class ConnectionManager extends BaseService {
         super(stateStore);
 
   ///连接成功监听器
-  void addOnConnectedListener(OnConnectedListener listener) {
-    _onConnectedListeners.add(listener);
-  }
+  void addOnConnectedListener(OnConnectedListener listener) => _onConnectedListeners.add(listener);
 
   ///连接失败关闭监听器
   void addOnDisconnectedListener(OnDisconnectedListener listener) => _onDisconnectedListeners.add(listener);

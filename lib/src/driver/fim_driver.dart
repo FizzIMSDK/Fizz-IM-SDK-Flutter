@@ -30,8 +30,7 @@ class FIMDriver {
   FIMDriver(this._fIMManager, String? tcpIp, int? tcpPort, int? connectTimeoutMillis, int? requestTimeoutMillis,
       int? minRequestIntervalMillis, int? heartbeatIntervalMillis) {
     _connectionManager = ConnectionManager(stateStore, tcpIp, tcpPort, connectTimeoutMillis)
-      ..addOnConnectedListener(_addOnConnectedListener) //连接成功回调
-      //..removeOnConnectedListener(_addOnConnectedListener)
+      //..addOnConnectedListener(_addOnConnectedListener) //连接成功回调
       ..addOnDisconnectedListener(_onConnectionDisconnected) //连接失败回调
       ..addMessageListener(_onMessage); //消息回调
     _heartbeatManager = HeartbeatManager(_stateStore, heartbeatIntervalMillis);
@@ -60,16 +59,17 @@ class FIMDriver {
 
   Future<void> connect(
       {String? host, int? port, int? connectTimeoutMillis, bool? useTls, SecurityContext? context}) async {
-    _connectionManager.connect(
-        host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
     _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnecting"));
+    await _connectionManager.connect(
+        host: host, port: port, connectTimeoutMillis: connectTimeoutMillis, useTls: useTls, context: context);
+    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
   }
 
   bool get isConnected => _stateStore.isConnected;
 
   //连接开启
-  void _addOnConnectedListener() {
-    _fIMManager.sdkCall(ListenerCallback(method: 'connectListener', type: "onConnectSuccess"));
+  void _addOnConnectedListener(OnConnectedListener listener) {
+    _connectionManager.addOnConnectedListener(listener);
   }
 
   //连接关闭 重置
@@ -105,15 +105,15 @@ class FIMDriver {
     final notification = await _messageManager.sendMsg(msg);
     //session是否创建 否则用本地token自动登录重连
     //if (request.hasCreateSessionRequest()) {
-    //   _heartbeatManager.start();
-    // }
+    _heartbeatManager.start();
+    //}
     return notification;
   }
 
   // 发送Msg消息 暂时不做重发啥的
-  Future sendMsg(Protocol msg, {autoResend: false}) async {
-    var payload = msg.encode();
-    stateStore.tcp!.writeVarIntLengthAndBytes(payload);
+  Future<void> sendMsg(Protocol msg) async {
+    final notification = await _messageManager.sendMsg(msg);
+
     _heartbeatManager.start();
   }
 
