@@ -86,7 +86,6 @@ class FIMDriver {
   void removeNotificationListener(NotificationListener listener) =>
       _messageManager.removeNotificationListener(listener);
 
-
   //连接关闭
   void addOnDisconnectedListener(OnDisconnectedListener listener) {
     _connectionManager.addOnDisconnectedListener(listener);
@@ -98,6 +97,7 @@ class FIMDriver {
   Future<Protocol> send(GenMessage genMessage) async {
     Protocol msg = Protocol.buildMsg(genMessage.getTo(), genMessage);
     final notification = await _messageManager.sendRequest(msg);
+    print("zzz");
     //session是否创建 否则用本地token自动登录重连
     //if (request.hasCreateSessionRequest()) {
     _heartbeatManager.start();
@@ -114,31 +114,27 @@ class FIMDriver {
 
   //处理二进制消息
   void _onMessage(Uint8List message) {
-    if (message.lengthInBytes > 0) {
-      Protocol protocol;
-
-      try {
-        protocol = Protocol.fromBuffer(message);
-      } catch (e, s) {
-        print('格式化协议失败: $e\n$s');
-        return;
-      }
-      //心跳消息异常
-      if (_heartbeatManager.rejectHeartbeatCompletersIfFail(protocol)) {
-        return;
-      }
-      //处理session状态 获取服务器id
-      // if (notification.data.hasUserSession()) {
-      //   final session = notification.data.userSession;
-      //   _stateStore
-      //     ..sessionId = session.sessionId
-      //     ..serverId = session.serverId;
-      // } else if (notification.hasCloseStatus()) {
-      //   _stateStore.isSessionOpen = false;
-      // }
-      _messageManager.didReceiveNotification(protocol);
-    } else {
-      _heartbeatManager.resolveHeartbeatCompleters();
+    Protocol protocol;
+    try {
+      protocol = Protocol.fromBuffer(message);
+    } catch (e, s) {
+      print('格式化协议失败: $e\n$s');
+      return;
     }
+    //心跳消息处理
+    if (_heartbeatManager.rejectHeartbeatCompletersIfFail(protocol)) {
+      return;
+    }
+
+    //处理session状态 获取服务器id
+    // if (notification.data.hasUserSession()) {
+    //   final session = notification.data.userSession;
+    //   _stateStore
+    //     ..sessionId = session.sessionId
+    //     ..serverId = session.serverId;
+    // } else if (notification.hasCloseStatus()) {
+    //   _stateStore.isSessionOpen = false;
+    // }
+    _messageManager.didReceiveNotification(protocol);
   }
 }

@@ -70,12 +70,9 @@ class UserManager {
   //修改在线状态
   void changeToOnline() {
     _fIMManager.driver.stateStore.isSessionOpen = true;
-    // if (!isLoggedIn) {
-    //   _fIMManager.driver.stateStore.isSessionOpen = true;
     for (final listener in _onOnlineListeners) {
       listener.call();
     }
-    //}
   }
 
   void changeToOffline(SessionCloseInfo sessionCloseInfo) {

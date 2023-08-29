@@ -47,9 +47,9 @@ class HeartbeatManager extends BaseService {
 
   Future<void> send() async {
     //检查连接
-    if (!stateStore.isConnected || !stateStore.isSessionOpen) {
-      throw ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed);
-    }
+    // if (!stateStore.isConnected || !stateStore.isSessionOpen) {
+    //   throw ResponseException(code: ResponseStatusCode.clientSessionHasBeenClosed);
+    // }
     print("发送心跳到服务器");
     stateStore.tcp!.write(Protocol.buildMsg("0", HeartbeatMsg()).encode());
     final completer = Completer<void>();
@@ -70,12 +70,12 @@ class HeartbeatManager extends BaseService {
     //服务器回复的心跳应答包。不处理
     if (notification.type == 51) {
       //心跳响应 不回调
+      this.resolveHeartbeatCompleters();
       return true;
     }
-
+    // //心跳异常 抛错
     // if (_heartbeatFailureRequestId == notification.requestId.toInt()) {
-    //   _rejectHeartbeatCompleters(
-    //       ResponseException.fromNotification(notification));
+    //   _rejectHeartbeatCompleters(ResponseException.fromNotification(notification));
     //   return true;
     // }
     return false;
