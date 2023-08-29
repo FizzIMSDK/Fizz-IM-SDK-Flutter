@@ -21,7 +21,7 @@ class RequestContext {
   //回调通知
   final Completer<Protocol> completer;
 
-  //定时任务
+  //消息超时定时任务
   final Timer? timeoutTimer;
 
   RequestContext(this.completer, this.timeoutTimer);
@@ -47,9 +47,9 @@ class DriverMessageManager extends BaseService {
       int? minRequestIntervalMillis)
       : super(stateStore) {
     _requestTimeoutMillis =
-        requestTimeoutMillis == null || requestTimeoutMillis <= 0
-            ? 60 * 1000
-            : requestTimeoutMillis;
+    requestTimeoutMillis == null || requestTimeoutMillis <= 0
+        ? 60 * 1000
+        : requestTimeoutMillis;
     _minRequestIntervalMillis = minRequestIntervalMillis ?? 0;
   }
 
@@ -75,7 +75,9 @@ class DriverMessageManager extends BaseService {
       throw ResponseException(
           code: ResponseStatusCode.clientSessionHasBeenClosed);
     }
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     final difference = now - stateStore.lastRequestDate;
     final isFrequent = _minRequestIntervalMillis > 0 &&
         difference <= _minRequestIntervalMillis;
@@ -85,15 +87,15 @@ class DriverMessageManager extends BaseService {
     }
 
     final requestId = _generateRandomId();
-    request.requestId = requestId.toInt64();
+    request.fp = requestId.toString();
     var payload = request.encode();
     stateStore.tcp!.writeVarIntLengthAndBytes(payload);
     final timeoutTimer = _requestTimeoutMillis > 0
         ? Timer(Duration(milliseconds: _requestTimeoutMillis), () {
-            final context = _idToRequest.remove(requestId);
-            context?.completer.completeError(
-                ResponseException(code: ResponseStatusCode.requestTimeout));
-          })
+      final context = _idToRequest.remove(requestId);
+      context?.completer.completeError(
+          ResponseException(code: ResponseStatusCode.requestTimeout));
+    })
         : null;
     final completer = Completer<Protocol>();
     final requestContext = RequestContext(completer, timeoutTimer);
@@ -102,37 +104,37 @@ class DriverMessageManager extends BaseService {
     return completer.future;
   }
 
-  void didReceiveNotification(notification) {
-    //获取消息id 清理上行缓存区。取消timer
-   /* final isResponse =
-        !notification.hasRelayedRequest() && notification.hasRequestId();
+  /// 接受协议消息
+  /// 处理上行缓存区消息并回调结果
+  void didReceiveNotification(Protocol notification) {
+    final isResponse = notification.fp != null;
     if (isResponse) {
-      final requestId = notification.requestId.toInt();
+      final requestId = notification.fp;
       final context = _idToRequest.remove(requestId);
       if (context != null) {
         context.timeoutTimer?.cancel();
-        if (notification.hasCode()) {
-        //回调消息发送成功
-          if (ResponseStatusCode.isSuccessCode(notification.code)) {
-            context.completer.complete(notification);
-          } else {
-            context.completer.completeError(
-                ResponseException.fromNotification(notification));
-          }
-        } else {
-          context.completer.completeError(ResponseException(
-              requestId:
-              notification.hasRequestId() ? notification.requestId : null,
-              code: ResponseStatusCode.invalidNotification,
-              reason: 'The code is missing'));
-        }
+        //回调新的
+        context.completer.complete(notification);
+        // if (notification.hasCode()) {
+        //   if (ResponseStatusCode.isSuccessCode(notification.code)) {
+        //     context.completer.complete(notification);
+        //   } else {
+        //     context.completer.completeError(
+        //         ResponseException.fromNotification(notification));
+        //   }
+        // } else {
+        //   context.completer.completeError(ResponseException(
+        //       requestId:
+        //       notification.hasRequestId() ? notification.requestId : null,
+        //       code: ResponseStatusCode.invalidNotification,
+        //       reason: 'The code is missing'));
+        // }
       }
-    }*/
+    }
 
 
-
-    _notifyNotificationListeners(notification);
-  }
+      _notifyNotificationListeners(notification);
+    }
 
 //   //读取通知
 //   void didReceiveNotification(Notification notification) {
@@ -162,41 +164,41 @@ class DriverMessageManager extends BaseService {
 //     _notifyNotificationListeners(notification);
 //   }
 //
-  ///获取随机数
-  int _generateRandomId() {
-    int id;
-    do {
-      id = _random.nextInt(randomMax);
-    } while (_idToRequest.containsKey(id));
-    return id;
-  }
+    ///获取随机数
+    int _generateRandomId() {
+      int id;
+      do {
+        id = _random.nextInt(randomMax);
+      } while (_idToRequest.containsKey(id));
+      return id;
+    }
 
 //
-  void _rejectRequestCompleter(ResponseException exception) {
-    // _idToRequest.removeWhere((key, context) {
-    //   context.completer.completeError(exception);
-    //   return true;
-    // });
-  }
+    void _rejectRequestCompleter(ResponseException exception) {
+      // _idToRequest.removeWhere((key, context) {
+      //   context.completer.completeError(exception);
+      //   return true;
+      // });
+    }
 
-  @override
-  Future<void> close() async {
-    onDisconnected();
-    return;
-  }
+    @override
+    Future<void> close() async {
+      onDisconnected();
+      return;
+    }
 
-  @override
-  void onDisconnected({Object? error, StackTrace? stackTrace}) {
-    final exception = ResponseException(
-        code: ResponseStatusCode.clientSessionHasBeenClosed,
-        cause: error,
-        stackTrace: stackTrace);
-    _rejectRequestCompleter(exception);
-  }
+    @override
+    void onDisconnected({Object? error, StackTrace? stackTrace}) {
+      final exception = ResponseException(
+          code: ResponseStatusCode.clientSessionHasBeenClosed,
+          cause: error,
+          stackTrace: stackTrace);
+      _rejectRequestCompleter(exception);
+    }
 
-  //发送消息
-  // Future sendMsg(Protocol msg) async {
-  //   var payload = msg.encode();
-  //   stateStore.tcp!.writeVarIntLengthAndBytes(payload);
-  // }
-}
+    //发送消息
+    // Future sendMsg(Protocol msg) async {
+    //   var payload = msg.encode();
+    //   stateStore.tcp!.writeVarIntLengthAndBytes(payload);
+    // }
+  }

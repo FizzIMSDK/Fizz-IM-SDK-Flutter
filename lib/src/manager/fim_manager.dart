@@ -59,10 +59,13 @@ class FIMManager {
     int? heartbeatIntervalMillis,
   }) {
     this._connectListener = listener;
-    _driver = FIMDriver(this, tcpIp, tcpPort, connectTimeoutMillis, requestTimeoutMillis, minRequestIntervalMillis,
-        heartbeatIntervalMillis)
-      ..addOnDisconnectedListener(({error, stackTrace}) => _userManager.changeToOffline(SessionCloseInfo.from(
-          closeStatus: SessionCloseStatus.connectionClosed, cause: error, stackTrace: stackTrace)));
+    _driver = FIMDriver(this, tcpIp, tcpPort, connectTimeoutMillis,
+        requestTimeoutMillis, minRequestIntervalMillis, heartbeatIntervalMillis)
+      ..addOnDisconnectedListener(({error, stackTrace}) =>
+          _userManager.changeToOffline(SessionCloseInfo.from(
+              closeStatus: SessionCloseStatus.connectionClosed,
+              cause: error,
+              stackTrace: stackTrace)));
     _userManager = UserManager(this);
     _messageManager = MessageManager(this);
     _storageManager = StorageManager(this, apiAddr);
@@ -75,7 +78,11 @@ class FIMManager {
   }
 
   //im登录
-  Future<UserInfo> login({required String userId, required String token, int? clientType, String? deviceId}) async {
+  Future<UserInfo> login(
+      {required String userId,
+      required String token,
+      int? clientType,
+      String? deviceId}) async {
     //判断tcp连接状态
     if (!_driver.isConnected) {
       await _driver.connect();
@@ -86,7 +93,7 @@ class FIMManager {
     loginReq.loginToken = token;
     loginReq.clientType = 3;
     loginReq.deviceId = "deviceId";
-    _driver.send(loginReq);
+    final n = _driver.send(loginReq);
 
     // //登录完成修改在线状态
     // _changeToOnline();
@@ -112,7 +119,8 @@ class FIMManager {
 
   ///登录调用
   void _registerNetworkCallback() {
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
   ///网络变更事件 目前实现网络检测自动重连。需要先判断用户在线状态再决定

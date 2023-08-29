@@ -22,7 +22,7 @@ class Protocol extends Codec {
   String? to;
 
   //全局唯一id
-  Int64? requestId;
+  String? fp;
 
   //用户协议 dataContent的
   int? typeu;
@@ -70,7 +70,7 @@ class Protocol extends Codec {
         from = map["from"] ?? '',
         to = map['to'] ?? '',
         typeu = map['typeu'] ?? '',
-        requestId = map['fp'] ?? '',
+        fp = map['fp'] ?? '',
         QoS = map['QoS'] ?? false,
         dataContent = map['dataContent'] ?? '';
 
@@ -80,7 +80,7 @@ class Protocol extends Codec {
       'from': from,
       'to': to,
       'typeu': typeu,
-      'fp': requestId,
+      'fp': fp,
       'QoS': QoS,
       'dataContent': dataContent,
     };

@@ -1,8 +1,9 @@
+import 'package:fim_sdk/fim_sdk.dart';
 import 'package:fixnum/fixnum.dart';
 
 //异常类
 class ResponseException implements Exception {
-  final Int64? requestId;
+  final String? requestId;
   final int code;
   final String? reason;
   final Object? cause;
@@ -14,6 +15,13 @@ class ResponseException implements Exception {
       this.reason,
       this.cause,
       this.stackTrace});
+
+  ResponseException.fromNotification(Protocol notification)
+      : this(
+      requestId:
+      notification.fp!=null ? notification.fp : null,
+      code: 1,
+      reason: "notification.hasReason()" );
 
   @override
   int get hashCode =>
