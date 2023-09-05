@@ -97,13 +97,22 @@ class FIMDriver {
   Future<Protocol> send(GenMessage genMessage) async {
     Protocol msg = Protocol.buildMsg(genMessage.getTo(), genMessage);
     final notification = await _messageManager.sendRequest(msg);
-    print("zzz");
     //session是否创建 否则用本地token自动登录重连
     //if (request.hasCreateSessionRequest()) {
     _heartbeatManager.start();
     //}
     return notification;
   }
+
+  // Future<Protocol> send1(to,String message) async {
+  //   Protocol msg = Protocol.buildMsg("0", HeartbeatMsg()).encode());
+  //   final notification = await _messageManager.sendRequest(msg);
+  //   //session是否创建 否则用本地token自动登录重连
+  //   //if (request.hasCreateSessionRequest()) {
+  //   _heartbeatManager.start();
+  //   //}
+  //   return notification;
+  // }
 
   // 发送Msg消息 暂时不做重发啥的
   // Future<void> sendMsg(Protocol msg) async {

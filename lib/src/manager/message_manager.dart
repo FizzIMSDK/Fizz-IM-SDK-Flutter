@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart' show Int64;
@@ -44,11 +45,9 @@ class MessageManager {
   //   // advancedMsgListeners.add(listener);
   // }
 
-  void addMessageListener(MessageListener listener) =>
-      _messageListeners.add(listener);
+  void addMessageListener(MessageListener listener) => _messageListeners.add(listener);
 
-  void removeMessageListener(MessageListener listener) =>
-      _messageListeners.remove(listener);
+  void removeMessageListener(MessageListener listener) => _messageListeners.remove(listener);
 
   // Future<Response<Int64>> sendMessage(bool isGroupMessage, Int64 targetId,
   //     {DateTime? deliveryDate,
@@ -75,14 +74,26 @@ class MessageManager {
   Protocol _createMessageRequest2Message(protocol) => Protocol();
 
 //创建文本消息
-  FimMessage createTextMessage ({
+  FimMessage createTextMessage({
     required String text,
   }) {
-    return FimMessage();
+    return FimMessage(elemType: 0, content: text);
   }
+
   // 发送json message.toJson()
-  Future<FimMessage> sendMessage({required  FimMessage message}) =>
-      _fIMManager.driver.send(new TextMsgReq()).then((value) => new FimMessage());
+  Future<FimMessage> sendMessage({
+    required FimMessage message,
+    //required OfflinePushInfo offlinePushInfo,
+    String? userID,
+    String? groupID,
+  }) {
+    TextMsgReq textMsgReq = TextMsgReq();
+    textMsgReq.fromId = "1";
+    textMsgReq.fromId = "2";
+    textMsgReq.dataContent = jsonEncode(message);
+    //jsonEncode(message)
+    return _fIMManager.driver.send(textMsgReq).then((value) => new FimMessage(elemType: 0));
+  }
 
 //创建图片消息
 }
